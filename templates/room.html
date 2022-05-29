@@ -1,0 +1,61 @@
+{% extends 'utils/base.html' %}
+{% block title %}{{username}} - Room ID: {{room_id}}{% endblock %}
+{% block content %}
+<div class="container my-3 room-container">
+    <div class="row">
+        <div class="col-8">
+            <div id="editor"></div>
+        </div>
+        <div class="col-4">
+            <div class="d-flex flex-column">
+                <div class="col input">
+                    <h4>Input</h4>
+                    <div id="input-div"></div>
+                </div>
+                <div class="col output">
+                    <h4>Output</h4>
+                    <div id="output-div"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function(){
+        const roomID = "{{room_id}}";
+        var username = "{{username}}";
+        var editor = ace.edit("editor");
+        const codeSocket = new WebSocket(
+            "ws://"
+            + window.location.host
+            + "/ws/code/"
+            + roomID
+            + "/"
+            + username
+            + "/"
+        );
+        codeSocket.onmessage = function(e){
+            var data = JSON.parse(e.data);
+            editor.setValue(data.source_code);
+            editor.clearSelection();
+            
+        };
+
+        codeSocket.onclose = function(e) {
+            console.error('Code socket closed unexpectedly');
+        };
+
+        editor.commands.on('afterExec', eventData => {
+            if(eventData.command.name === 'insertstring'){
+                var source_code = editor.getValue();
+                codeSocket.send(JSON.stringify({
+                    'source_code': source_code
+                }))
+            }
+        })
+    })
+</script>
+{% endblock %}
