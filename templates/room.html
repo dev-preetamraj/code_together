@@ -4,6 +4,18 @@
 <div class="container my-3 room-container">
     <div class="row">
         <div class="col-8">
+            <select name="language" id="language-id">
+                <option>Choose Language</option>
+                <option value="4">C (gcc 7.2.0)</option>
+                <option value="10">C++ (g++ 7.2.0)</option>
+                <option value="16">C# (mono 5.4.0.167)</option>
+                <option value="22">Go (1.9)</option>
+                <option value="26">Java (OpenJDK 9 with Eclipse OpenJ9)</option>
+                <option value="27">Java (OpenJDK 8)</option>
+                <option value="29">JavaScript (nodejs 8.5.0)</option>
+                <option value="34">Python (3.6.0)</option>
+                <option value="43">Text (plain text)</option>
+            </select>
             <div id="editor"></div>
         </div>
         <div class="col-4">
@@ -19,15 +31,42 @@
             </div>
         </div>
     </div>
+    <div id="chat-div">
+        <span>Chat with Members...</span>
+        <div id="chat-close" class="btn btn-outline-danger">X</div>
+        <div class="d-flex flex-column" id="chat-box">
+            <div id="chat-show-window"></div>
+            <div id="chat-control-window">
+                <input autocomplete="off" type="text" id="msg-input">
+                <i class="bi bi-send btn" id="chat-send-btn"></i>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     $(document).ready(function(){
+
+        
+
         const roomID = "{{room_id}}";
         var username = "{{username}}";
         var editor = ace.edit("editor");
+        var input_editor = ace.edit("input-div");
+        var output_editor = ace.edit("output-div");
+        var setModeObj = {
+            "4": "c_cpp",
+            "10": "c_cpp",
+            "16": "csharp",
+            "22": "golang",
+            "26": "java",
+            "27": "java",
+            "29": "javascript",
+            "34": "python",
+            "43": "text"
+        }
         const codeSocket = new WebSocket(
             "ws://"
             + window.location.host
@@ -41,6 +80,16 @@
             var data = JSON.parse(e.data);
             editor.setValue(data.source_code);
             editor.clearSelection();
+            input_editor.setValue(data.input_text);
+            input_editor.clearSelection();
+            // if(output_editor.getSession().getValue() !== data.output_text){
+                
+            // }
+            output_editor.setValue(data.output_text);
+            output_editor.clearSelection();
+            var languageID = data.languageID;
+            $('#language-id option[value='+languageID+']').attr('selected', 'selected');
+            editor.session.setMode("ace/mode/"+setModeObj[languageID]);
             
         };
 
@@ -48,12 +97,100 @@
             console.error('Code socket closed unexpectedly');
         };
 
+        var data_set = {
+            "source_code": "",
+            "languageID": "",
+            "input_text": "",
+            "output_text": ""
+        };
+
         editor.commands.on('afterExec', eventData => {
             if(eventData.command.name === 'insertstring'){
                 var source_code = editor.getValue();
-                codeSocket.send(JSON.stringify({
-                    'source_code': source_code
+                data_set['source_code'] = source_code;
+                codeSocket.send(JSON.stringify(data_set))
+            }
+        });
+
+        input_editor.commands.on('afterExec', eventData => {
+            if(eventData.command.name === 'insertstring'){
+                var input_text = input_editor.getValue();
+                data_set['input_text'] = input_text;
+                codeSocket.send(JSON.stringify(data_set))
+            }
+        });
+
+        output_editor.commands.on('afterExec', eventData => {
+            if(eventData.command.name === 'insertstring'){
+                var output_text = output_editor.getValue();
+                data_set['output_text'] = output_text;
+                codeSocket.send(JSON.stringify(data_set))
+            }
+        });
+
+        $('#language-id').on('change', (event) => {
+            var languageID = event.target.value;
+            data_set['languageID'] = languageID
+            codeSocket.send(JSON.stringify(data_set))
+        });
+
+
+        // Chat socket
+        const chatSocket = new WebSocket(
+            "ws://"
+            + window.location.host
+            + "/ws/chat/"
+            + roomID
+            + "/"
+            + username
+            + "/"
+        );
+
+        chatSocket.onmessage = function(e){
+            var data = JSON.parse(e.data);
+            $('#chat-show-window').append(
+                "<div class=\"R-msg-box d-flex flex-column\"><div class=\"user\">"
+                + data.sender
+                + ":</div><p>"
+                + data.chat_message
+                + "</p></div>"
+            )
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Code socket closed unexpectedly');
+            console.log(e);
+        };
+
+        $("#chat-send-btn").click((event) => {
+            event.preventDefault();
+            var chat_message = $("#msg-input").val();
+            $('#chat-show-window').append(
+                "<div class=\"S-msg-box d-flex flex-column\"><div class=\"user\">You:</div><p>"
+                + chat_message
+                + "</p></div>"
+            )
+            chatSocket.send(JSON.stringify({
+                'chat_message': chat_message,
+                'sender': "{{username}}"
+            }))
+            var chat_message = $("#msg-input").val("");
+        })
+
+        $("#msg-input").on("keypress",(event) => {
+            if(event.keyCode === 13){
+                event.preventDefault();
+                var chat_message = $("#msg-input").val();
+                $('#chat-show-window').append(
+                    "<div class=\"S-msg-box d-flex flex-column\"><div class=\"user\">You:</div><p>"
+                    + chat_message
+                    + "</p></div>"
+                )
+                chatSocket.send(JSON.stringify({
+                    'chat_message': chat_message,
+                    'sender': "{{username}}"
                 }))
+                var chat_message = $("#msg-input").val("");
             }
         })
     })
