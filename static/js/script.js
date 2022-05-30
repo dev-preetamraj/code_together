@@ -20,6 +20,7 @@ $(document).ready(function(){
     });
     
     
+    var console_editor = ace.edit('status-div')
 
     var input_editor = ace.edit('input-div');
     // input_editor.setTheme("ace/theme/monokai");
@@ -42,6 +43,11 @@ $(document).ready(function(){
             "source_code": source_code,
             "language_id": $('#language-id').val()
         }
+        var stdin = input_editor.getValue();
+        if(stdin !== ""){
+            body['stdin'] = stdin;
+        }
+
         $.ajax({
             type: 'POST',
             url: url,
@@ -62,9 +68,25 @@ $(document).ready(function(){
                         $('#submit-code').prop('disabled', false);
                         $('#submit-code').html("Submit");
                         editor.setReadOnly(false);
-                        output_editor.setValue(data.stdout);
-                        output_editor.setReadOnly(true);
-                        output_editor.clearSelection();
+                        if(data.stdout !== null){
+                            output_editor.setValue(data.stdout);
+                            output_editor.setReadOnly(true);
+                            output_editor.clearSelection();
+                        }
+                        var status_text = data.status.description;
+                        var stderr = data.stderr;
+                        if(status_text!==null){
+                            console_editor.setValue("Status: " + status_text);
+                            console_editor.clearSelection();
+                            console_editor.setReadOnly(true);
+                        }
+                        if(stderr !== null){
+                            var final_console_text = "Status: "+status_text+"\n\n"+stderr;
+                            console_editor.setValue(final_console_text);
+                            console_editor.clearSelection();
+                            console_editor.setReadOnly(true);
+                        }
+                        
                     },
                     error: function(e){
                         console.log(e);
