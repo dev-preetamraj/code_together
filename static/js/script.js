@@ -109,4 +109,21 @@ $(document).ready(function(){
         event.preventDefault();
         $('#chat-div').hide();
     });
+
+    $('#clear-editor').click((event) => {
+        event.preventDefault();
+        if(confirm("Are you sure you want to clear the Editor?")){
+            editor.setValue("");
+        }
+    });
+
+    $('#user-close').click((event) => {
+        event.preventDefault();
+        $('#user-div').hide();
+    })
+
+    $('#show-user').click((event) => {
+        event.preventDefault();
+        $('#user-div').show();
+    })
 })

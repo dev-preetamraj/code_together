@@ -1,4 +1,38 @@
 {% extends 'utils/base.html' %}
 {% block content %}
-
+{% include 'utils/index_nav.html' %}
+<h5 class="index-head">Enter or Create a Room</h5>
+<div class="index-container">
+    <form id="create-room-form">
+        <div class="form-group">
+          <label for="username">Username/Name:</label>
+          <input type="text" class="form-control" id="username-input" placeholder="Username">
+        </div>
+        <div class="form-group">
+          <label for="room_id">Room ID:</label>
+          <input type="text" class="form-control" id="room-id-input" placeholder="Room ID">
+        </div>
+        <button type="submit" class="btn btn-outline-success btn-block">Create/Enter Room</button>
+    </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+    $(document).ready(function(){
+        $('#create-room-form').submit((event) => {
+            event.preventDefault();
+            var username = $('#username-input').val();
+            var room_id = $('#room-id-input').val();
+            if(username===""){
+                alert('Username Cannot be Empty.');
+            }
+            else if(room_id===""){
+                alert('Room ID cannot be Empty.');
+            }
+            else {
+                window.location.pathname = "room/" + room_id + "/" + username + "/";
+            }
+        })
+    });
+</script>
 {% endblock %}

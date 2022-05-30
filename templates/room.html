@@ -1,6 +1,8 @@
 {% extends 'utils/base.html' %}
 {% block title %}{{username}} - Room ID: {{room_id}}{% endblock %}
+
 {% block content %}
+{% include 'utils/navbar.html' %}
 <div class="container my-3 room-container">
     <div class="row">
         <div class="col-8">
@@ -44,14 +46,19 @@
             </div>
         </div>
     </div>
+    <div id="user-div">
+        <h5>Active Users</h5>
+        <div id="user-close" class="btn btn-outline-danger">X</div>
+        <ol id="user-div-ol">
+            
+        </ol>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
     $(document).ready(function(){
-
-        
 
         const roomID = "{{room_id}}";
         var username = "{{username}}";
@@ -78,6 +85,7 @@
             + username
             + "/"
         );
+        
         codeSocket.onmessage = function(e){
             var data = JSON.parse(e.data);
             editor.setValue(data.source_code);
@@ -195,6 +203,25 @@
                 var chat_message = $("#msg-input").val("");
             }
         })
+
+        const userSocket = new WebSocket(
+            "ws://"
+            + window.location.host
+            + "/ws/user/"
+            + roomID
+            + "/"
+            + username
+            + "/"
+        );
+        userSocket.onmessage = function(e){
+            var data = JSON.parse(e.data);
+            var user_list = data.user_list
+            for(var i=0; i<user_list.length; i++){
+                $('#user-div-ol').append(
+                    "<li>"+user_list[i]+"</li>"
+                )
+            }
+        }
     })
 </script>
 {% endblock %}

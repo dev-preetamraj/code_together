@@ -1,22 +1,34 @@
 import json
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
+from .models import RoomGroup, ActiveUser
+import time
 
 class CodeConsumer(WebsocketConsumer):
     def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.username = self.scope['url_route']['kwargs']['username']
         self.room_group_name = f"room_{self.room_id}"
+        self.room_group, room_created = RoomGroup.objects.get_or_create(room_id=self.room_id)
+        self.active_user, user_created = ActiveUser.objects.get_or_create(room_group=self.room_group,username=self.username)
 
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
         )
+        
         self.accept()
 
     def disconnect(self, close_code):
         # Leave room group
+        try:
+            self.active_user.delete()
+            users_list = ActiveUser.objects.filter(room_group=self.room_group)
+            if(users_list.count()==0):
+                self.room_group.delete()
+        except Exception as e:
+            print(e)
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
             self.channel_name
@@ -108,3 +120,34 @@ class ChatConsumer(WebsocketConsumer):
                 'chat_message': chat_message,
                 'sender': sender,
             }))
+
+class UserConsumer(WebsocketConsumer):
+    def connect(self):
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.username = self.scope['url_route']['kwargs']['username']
+        self.room_group_name = f"username_{self.room_id}"
+
+        # Join room group
+        async_to_sync(self.channel_layer.group_add)(
+            self.room_group_name,
+            self.channel_name
+        )
+        self.accept()
+        
+        user_list = []
+        self.room_group = RoomGroup.objects.get(room_id=self.room_id)
+        active_users = ActiveUser.objects.filter(room_group=self.room_group)
+        for user in active_users:
+            user_list.append(user.username)
+        
+        text_data = json.dumps({
+            'user_list': user_list
+        })
+        self.send(text_data=text_data)
+
+    def disconnect(self, close_code):
+        # Leave room group
+        async_to_sync(self.channel_layer.group_discard)(
+            self.room_group_name,
+            self.channel_name
+        )

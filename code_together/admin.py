@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import RoomGroup, ActiveUser
 
-# Register your models here.
+admin.site.register(RoomGroup)
+admin.site.register(ActiveUser)
