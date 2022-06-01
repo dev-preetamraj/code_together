@@ -28,4 +28,5 @@ twisted-iocpsupport==1.0.2
 txaio==22.2.1
 typing_extensions==4.2.0
 tzdata==2022.1
+whitenoise==6.1.0
 zope.interface==5.4.0
