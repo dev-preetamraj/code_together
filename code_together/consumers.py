@@ -178,6 +178,7 @@ class DrawConsumer(WebsocketConsumer):
         lineColor = text_data_json['lineColor']
         currX = text_data_json['currX']
         currY = text_data_json['currY']
+        painting = text_data_json['painting']
 
         # Send draw_data to room group
         async_to_sync(self.channel_layer.group_send)(
@@ -188,6 +189,7 @@ class DrawConsumer(WebsocketConsumer):
                 'lineColor': lineColor,
                 'currX': currX,
                 'currY': currY,
+                'painting': painting,
                 'sender_channel_name': self.channel_name
             }
         )
@@ -197,6 +199,7 @@ class DrawConsumer(WebsocketConsumer):
         lineColor = event['lineColor']
         currX = event['currX']
         currY = event['currY']
+        painting = event['painting']
 
         # Send source_code to WebSocket
         if self.channel_name != event.get('sender_channel_name'):
@@ -204,5 +207,6 @@ class DrawConsumer(WebsocketConsumer):
                 'lineWidth': lineWidth,
                 'lineColor': lineColor,
                 'currX': currX,
-                'currY': currY
+                'currY': currY,
+                'painting': painting
             }))

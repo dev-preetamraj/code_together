@@ -38,24 +38,30 @@ $(document).ready(function(){
 
     function endPosition(){
         painting = false;
+        data_to_send['painting'] = false;
+        drawSocket.send(JSON.stringify(data_to_send));
         ctx.beginPath();
     };
 
     drawSocket.onmessage = function(e) {
         var data = JSON.parse(e.data);
         console.log(data);
+        console.log(data);
         let currX = data.currX;
-        let currY = data.currY
-        ctx.lineWidth = data.lineWidth;
-        ctx.strokeStyle = data.lineColor;
-        ctx.lineCap = 'round';
+        let currY = data.currY;
+        if(!data.painting){
+            ctx.beginPath();
+        }else{
+            ctx.lineWidth = data.lineWidth;
+            ctx.strokeStyle = data.lineColor;
+            ctx.lineCap = 'round';
 
-        
-        ctx.lineTo(currX, currY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(currX, currY);
-        ctx.restore();
+            
+            ctx.lineTo(currX, currY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(currX, currY);
+        }
         
     };
 
@@ -69,6 +75,7 @@ $(document).ready(function(){
         'lineColor': '',
         'currX': 0,
         'currY': 0,
+        'painting': false
     }
 
     function draw(e){
@@ -79,6 +86,7 @@ $(document).ready(function(){
         ctx.strokeStyle = lineColor;
         data_to_send['lineColor'] = lineColor
         ctx.lineCap = 'round';
+        data_to_send['painting'] = true;
 
         let r = canvas[0].getBoundingClientRect();
         currX = e.clientX - r.left;
