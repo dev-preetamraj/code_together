@@ -53,6 +53,18 @@
             
         </ol>
     </div>
+    <div id="draw">
+        <div id="wboard-close" class="btn btn-outline-danger">X</div>
+        <div id="wb-nav">
+            <button id="draw-btn" class="btn btn-outline-dark btn-sm">Draw</button>
+            <button id="erase-btn" class="btn btn-outline-danger btn-sm">Erase</button>
+        </div>
+        <canvas id="canvas" height="536px" width="575px"></canvas>
+        <div id="wb-footer">
+
+        </div>
+
+    </div>
 </div>
 {% endblock %}
 
@@ -168,7 +180,7 @@
         };
 
         chatSocket.onclose = function(e) {
-            console.error('Code socket closed unexpectedly');
+            console.error('Chat socket closed unexpectedly');
             console.log(e);
         };
 
@@ -213,6 +225,12 @@
             + username
             + "/"
         );
+
+        userSocket.onclose = function(e) {
+            console.error('User socket closed unexpectedly');
+            console.log(e);
+        };
+
         userSocket.onmessage = function(e){
             var data = JSON.parse(e.data);
             var user_list = data.user_list
@@ -223,5 +241,10 @@
             }
         }
     })
+</script>
+
+<script>
+    const room_id = "{{room_id}}"
+    const username = "{{username}}"
 </script>
 {% endblock %}
