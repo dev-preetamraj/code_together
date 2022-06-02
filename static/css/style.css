@@ -149,7 +149,7 @@
 #user-div {
     position: absolute;
     top: 80px;
-    left: 20px;
+    left: 640px;
     width: 300px;
     height: 400px;
     background: rgb(241, 241, 241);
@@ -172,4 +172,69 @@
     height: 25px;
     width: 25px;
     border-radius: 50%;
+    z-index: 20;
+}
+
+#draw {
+    position: absolute;
+    height: 650px;
+    width: 610px;
+    top: 80px;
+    left: 20px;
+    border: 1px solid black;
+    border-radius: 20px;
+    background: rgb(242, 242, 242);
+    z-index: 100;
+}
+
+#wb-nav {
+    height: 50px;
+    width: 75%;
+    border-radius: 20px;
+    position: absolute;
+    top: 2px;
+    left: 68px;
+    background: rgb(221, 221, 221);
+}
+
+#wb-footer {
+    height: 50px;
+    width: 75%;
+    border-radius: 20px;
+    position: absolute;
+    bottom: 2px;
+    left: 68px;
+    background: rgb(221, 221, 221);
+}
+#canvas {
+    position: absolute;
+    top: 55px;
+    left: 15px;
+    background: #fff;
+    border-radius: 20px;
+    cursor: cell;
+
+}
+
+#wboard-close {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    right: 8px;
+    top: 8px;
+    height: 25px;
+    width: 25px;
+    border-radius: 50%;
+    z-index: 20;
+}
+
+#draw-btn {
+    margin-left: 37%;
+    margin-top: 8px;
+}
+
+#erase-btn {
+    margin-left: 5px;
+    margin-top: 8px;
 }

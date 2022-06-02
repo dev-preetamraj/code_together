@@ -126,4 +126,14 @@ $(document).ready(function(){
         event.preventDefault();
         $('#user-div').show();
     })
+
+    $('#wboard-close').click((event) => {
+        event.preventDefault();
+        $('#draw').hide();
+    });
+    
+    $('#show-wboard').click((event) => {
+        event.preventDefault();
+        $('#draw').show();
+    })
 })
