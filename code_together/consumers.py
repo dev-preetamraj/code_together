@@ -41,7 +41,8 @@ class CodeConsumer(WebsocketConsumer):
         languageID = text_data_json['languageID']
         input_text = text_data_json['input_text']
         output_text = text_data_json['output_text']
-        print(output_text)
+        dissable_editor = text_data_json['dissable_editor']
+        console_text = text_data_json['console_text']
 
         # Send source_code to room group
         async_to_sync(self.channel_layer.group_send)(
@@ -52,6 +53,8 @@ class CodeConsumer(WebsocketConsumer):
                 'languageID': languageID,
                 'input_text': input_text,
                 'output_text': output_text,
+                'dissable_editor': dissable_editor,
+                'console_text': console_text,
                 'sender_channel_name': self.channel_name
             }
         )
@@ -62,6 +65,8 @@ class CodeConsumer(WebsocketConsumer):
         languageID = event['languageID']
         input_text = event['input_text']
         output_text = event['output_text']
+        dissable_editor = event['dissable_editor']
+        console_text = event['console_text']
 
         # Send source_code to WebSocket
         if self.channel_name != event.get('sender_channel_name'):
@@ -69,7 +74,9 @@ class CodeConsumer(WebsocketConsumer):
                 'source_code': source_code,
                 'languageID': languageID,
                 'input_text': input_text,
-                'output_text': output_text
+                'output_text': output_text,
+                'dissable_editor': dissable_editor,
+                'console_text': console_text
             }))
 
 class ChatConsumer(WebsocketConsumer):
